@@ -43,7 +43,24 @@ box.Position = UDim2.new(0.1,0,0.4,0)
 box.PlaceholderText = "ENTER KEY"
 Instance.new("UICorner",box)
 
-if player.Name == "jinoxx_back" then
+-- قائمة اليوزرات المسموح لهم
+local VIP_USERS = {
+	"jinoxx_back",
+	"chirox_a"
+}
+
+-- دالة تتحقق هل اللاعب VIP
+local function IsVIP(name)
+	for _,v in pairs(VIP_USERS) do
+		if string.lower(v) == string.lower(name) then
+			return true
+		end
+	end
+	return false
+end
+
+-- AUTO KEY
+if IsVIP(player.Name) then
 	box.Text = GenerateKey()
 end
 
@@ -220,6 +237,100 @@ end
 for _,v in pairs(workspace:GetChildren()) do
 	if v:IsA("Model") then CreateESP(v) end
 end
+
+-- يعمل فقط في Brookhaven
+if game.PlaceId ~= 4924922222 then
+	warn("This script works only in Brookhaven!")
+	return
+end
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local hum = char:WaitForChild("Humanoid")
+
+-- قائمة رقصات (Animation IDs)
+local Dances = {
+	["Dance1"] = "rbxassetid://507771019",
+	["Dance2"] = "rbxassetid://507776043",
+	["Dance3"] = "rbxassetid://507777268",
+	["Dance4"] = "rbxassetid://507780384",
+	["Dance5"] = "rbxassetid://507784897",
+}
+
+local currentAnim = nil
+
+-- تشغيل رقصة
+local function PlayDance(id)
+	if currentAnim then
+		currentAnim:Stop()
+	end
+	
+	local anim = Instance.new("Animation")
+	anim.AnimationId = id
+	
+	currentAnim = hum:LoadAnimation(anim)
+	currentAnim:Play()
+end
+
+-- إيقاف
+local function StopDance()
+	if currentAnim then
+		currentAnim:Stop()
+	end
+end
+
+-- UI
+local gui = Instance.new("ScreenGui", player.PlayerGui)
+
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0,200,0,250)
+frame.Position = UDim2.new(0,20,0,200)
+frame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+
+local UIcorner = Instance.new("UICorner", frame)
+UIcorner.CornerRadius = UDim.new(0,15)
+
+-- عنوان
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1,0,0,30)
+title.Text = "DANCES"
+title.TextColor3 = Color3.new(1,1,1)
+title.BackgroundTransparency = 1
+
+-- زر
+local y = 40
+for name,id in pairs(Dances) do
+	local btn = Instance.new("TextButton", frame)
+	btn.Size = UDim2.new(0.9,0,0,30)
+	btn.Position = UDim2.new(0.05,0,0,y)
+	btn.Text = name
+	btn.BackgroundColor3 = Color3.fromRGB(30,30,30)
+	btn.TextColor3 = Color3.new(1,1,1)
+	
+	local c = Instance.new("UICorner", btn)
+	c.CornerRadius = UDim.new(0,10)
+	
+	btn.MouseButton1Click:Connect(function()
+		PlayDance(id)
+	end)
+	
+	y = y + 35
+end
+
+-- زر إيقاف
+local stop = Instance.new("TextButton", frame)
+stop.Size = UDim2.new(0.9,0,0,30)
+stop.Position = UDim2.new(0.05,0,1,-35)
+stop.Text = "STOP"
+stop.BackgroundColor3 = Color3.fromRGB(100,0,0)
+stop.TextColor3 = Color3.new(1,1,1)
+
+Instance.new("UICorner", stop)
+
+stop.MouseButton1Click:Connect(function()
+	StopDance()
+end)
 
 --////////////////////////////////////////////////////
 -- SYSTEMS
