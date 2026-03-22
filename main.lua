@@ -16,25 +16,10 @@ local function GenerateKey()
 	return prefix .. string.format("%02d", num)
 end
 
--- VIP USERS
-local VIP_USERS = {
-	"jinoxx_back"
-}
-
-local function IsVIP(name)
-	for _,v in pairs(VIP_USERS) do
-		if string.lower(v) == string.lower(name) then
-			return true
-		end
-	end
-	return false
-end
-
 --////////////////////////////////////////////////////
 -- GUI
 --////////////////////////////////////////////////////
-local gui = Instance.new("ScreenGui")
-gui.Parent = player:WaitForChild("PlayerGui")
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 
 -- LOGIN
 local login = Instance.new("Frame", gui)
@@ -43,7 +28,7 @@ login.Position = UDim2.new(0.5,-180,0.5,-115)
 login.BackgroundColor3 = Color3.fromRGB(10,10,20)
 login.Active = true
 login.Draggable = true
-Instance.new("UICorner",login).CornerRadius = UDim.new(0,20)
+Instance.new("UICorner",login).CornerRadius = UDim.new(0,25)
 
 local title = Instance.new("TextLabel",login)
 title.Size = UDim2.new(1,0,0,50)
@@ -58,7 +43,23 @@ box.Position = UDim2.new(0.1,0,0.4,0)
 box.PlaceholderText = "ENTER KEY"
 Instance.new("UICorner",box)
 
--- AUTO KEY VIP
+-- قائمة اليوزرات المسموح لهم
+local VIP_USERS = {
+	"jinoxx_back",
+	"chirox_a"
+}
+
+-- دالة تتحقق هل اللاعب VIP
+local function IsVIP(name)
+	for _,v in pairs(VIP_USERS) do
+		if string.lower(v) == string.lower(name) then
+			return true
+		end
+	end
+	return false
+end
+
+-- AUTO KEY
 if IsVIP(player.Name) then
 	box.Text = GenerateKey()
 end
@@ -70,54 +71,40 @@ btn.Text = "LOGIN"
 btn.BackgroundColor3 = Color3.fromRGB(0,200,255)
 Instance.new("UICorner",btn)
 
---////////////////////////////////////////////////////
--- MAIN
---////////////////////////////////////////////////////
+-- MAIN GUI
 local main = Instance.new("Frame", gui)
 main.Size = UDim2.new(0,600,0,360)
 main.Position = UDim2.new(0.3,0,0.3,0)
 main.BackgroundColor3 = Color3.fromRGB(5,5,10)
-main.Visible = false
+main.Visible = true -- تظهر عند التشغيل لأول مرة
 main.Active = true
 main.Draggable = true
-Instance.new("UICorner",main)
+local mainCorner = Instance.new("UICorner", main)
+mainCorner.CornerRadius = UDim.new(0,20)
 
--- TITLE
-local t = Instance.new("TextLabel",main)
-t.Size = UDim2.new(1,0,0,40)
-t.Text = "⚡ JINOXX XIT PRO ⚡"
-t.TextColor3 = Color3.fromRGB(0,200,255)
-t.BackgroundTransparency = 1
-t.TextScaled = true
-
--- CLOSE
-local closeBtn = Instance.new("TextButton", main)
-closeBtn.Size = UDim2.new(0,35,0,35)
-closeBtn.Position = UDim2.new(1,-45,0,5)
-closeBtn.Text = "X"
-closeBtn.BackgroundColor3 = Color3.fromRGB(80,0,0)
-Instance.new("UICorner", closeBtn)
-
--- FLOAT BUTTON
+-- FLOAT BUTTON (OPEN)
 local float = Instance.new("TextButton", gui)
 float.Size = UDim2.new(0,120,0,40)
 float.Position = UDim2.new(0,20,0,200)
 float.Text = "OPEN"
-float.Visible = false
+float.Visible = false -- يكون مخفيًا عند ظهور Main
 float.BackgroundColor3 = Color3.fromRGB(0,0,0)
-float.TextColor3 = Color3.fromRGB(0,200,255)
-Instance.new("UICorner",float)
+float.TextColor3 = Color3.fromRGB(0,0,255)
+float.Font = Enum.Font.GothamBold
+float.TextScaled = true
+local floatCorner = Instance.new("UICorner", float)
+floatCorner.CornerRadius = UDim.new(0,15)
 
--- DRAG OPEN BUTTON
+--// سحب وتحريك الزر
 local dragging = false
-local dragInput, startPos, startFramePos
+local dragInput, mousePos, framePos
 
 float.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
 		dragging = true
-		startPos = input.Position
-		startFramePos = float.Position
-		
+		mousePos = input.Position
+		framePos = float.Position
+
 		input.Changed:Connect(function()
 			if input.UserInputState == Enum.UserInputState.End then
 				dragging = false
@@ -132,37 +119,60 @@ float.InputChanged:Connect(function(input)
 	end
 end)
 
-UIS.InputChanged:Connect(function(input)
+game:GetService("UserInputService").InputChanged:Connect(function(input)
 	if input == dragInput and dragging then
-		local delta = input.Position - startPos
+		local delta = input.Position - mousePos
 		float.Position = UDim2.new(
-			startFramePos.X.Scale,
-			startFramePos.X.Offset + delta.X,
-			startFramePos.Y.Scale,
-			startFramePos.Y.Offset + delta.Y
+			framePos.X.Scale, framePos.X.Offset + delta.X,
+			framePos.Y.Scale, framePos.Y.Offset + delta.Y
 		)
 	end
 end)
 
--- BUTTONS
+--// عند الضغط على الزر، تظهر القائمة الرئيسية وتختفي الزر
 float.MouseButton1Click:Connect(function()
 	main.Visible = true
 	float.Visible = false
 end)
 
+-- مثال لإخفاء القائمة وإظهار الزر
+-- يمكنك وضعه عند زر CLOSE داخل Main
+local closeBtn = Instance.new("TextButton", main)
+closeBtn.Size = UDim2.new(0,35,0,35)
+closeBtn.Position = UDim2.new(1,-45,0,5)
+closeBtn.Text = "X"
+closeBtn.TextColor3 = Color3.fromRGB(0,0,255)
+closeBtn.BackgroundColor3 = Color3.fromRGB(20,0,0)
+local closeCorner = Instance.new("UICorner", closeBtn)
+closeCorner.CornerRadius = UDim.new(0,12)
+
 closeBtn.MouseButton1Click:Connect(function()
 	main.Visible = false
 	float.Visible = true
 end)
+-- TITLE
+local t = Instance.new("TextLabel",main)
+t.Size = UDim2.new(1,0,0,40)
+t.Text = "⚡ JINOXX XIT PRO MAX ⚡"
+t.TextColor3 = Color3.fromRGB(0,200,255)
+t.BackgroundTransparency = 1
+t.TextScaled = true
 
--- LOGIN SYSTEM
-btn.MouseButton1Click:Connect(function()
-	if box.Text == GenerateKey() then
-		login.Visible = false
-		main.Visible = true
-	else
-		box.Text = "WRONG KEY ❌"
-	end
+-- HIDE
+local hide = Instance.new("TextButton",main)
+hide.Size = UDim2.new(0,30,0,30)
+hide.Position = UDim2.new(1,-35,0,5)
+hide.Text = "-"
+Instance.new("UICorner",hide)
+
+hide.MouseButton1Click:Connect(function()
+	main.Visible = false
+	float.Visible = true
+end)
+
+float.MouseButton1Click:Connect(function()
+	main.Visible = true
+	float.Visible = false
 end)
 
 --////////////////////////////////////////////////////
@@ -178,7 +188,9 @@ local Settings = {
 	Jump=50
 }
 
+--////////////////////////////////////////////////////
 -- TOGGLE
+--////////////////////////////////////////////////////
 local function Toggle(text,y,callback)
 	local state=false
 	
@@ -256,15 +268,204 @@ tp.MouseButton1Click:Connect(function()
 	end
 end)
 
+--////////////////////////////////////////////////////
+-- ESP SYSTEM
+--////////////////////////////////////////////////////
+local function CreateESP(m)
+	if not m:FindFirstChild("Head") then return end
+	
+	local bill = Instance.new("BillboardGui", m.Head)
+	bill.Size = UDim2.new(0,120,0,50)
+	bill.AlwaysOnTop = true
+	
+	local txt = Instance.new("TextLabel",bill)
+	txt.Size = UDim2.new(1,0,1,0)
+	txt.BackgroundTransparency = 1
+	txt.TextColor3 = Color3.fromRGB(0,255,255)
+	txt.TextScaled = true
+	
+	RunService.RenderStepped:Connect(function()
+		if Settings.ESP and m:FindFirstChild("HumanoidRootPart") then
+			local dist = (player.Character.HumanoidRootPart.Position - m.HumanoidRootPart.Position).Magnitude
+			txt.Text = m.Name.." ["..math.floor(dist).."]"
+			bill.Enabled = true
+		else
+			bill.Enabled = false
+		end
+	end)
+end
+
+for _,v in pairs(workspace:GetChildren()) do
+	if v:IsA("Model") then CreateESP(v) end
+end
+
+-- يعمل فقط في Brookhaven
+if game.PlaceId ~= 4924922222 then
+	warn("This script works only in Brookhaven!")
+	return
+end
+
+--// SERVICES
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UIS = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local hum = char:WaitForChild("Humanoid")
+
+-- قائمة رقصات (Animation IDs)
+local Dances = {
+	["Dance1"] = "rbxassetid://507771019",
+	["Dance2"] = "rbxassetid://507776043",
+	["Dance3"] = "rbxassetid://507777268",
+	["Dance4"] = "rbxassetid://507780384",
+	["Dance5"] = "rbxassetid://507784897",
+}
+
+local currentAnim = nil
+
+-- تشغيل رقصة
+local function PlayDance(id)
+	if currentAnim then
+		currentAnim:Stop()
+	end
+	local anim = Instance.new("Animation")
+	anim.AnimationId = id
+	currentAnim = hum:LoadAnimation(anim)
+	currentAnim:Play()
+end
+
+-- إيقاف الرقصة
+local function StopDance()
+	if currentAnim then
+		currentAnim:Stop()
+	end
+end
+
+-- UI
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0,200,0,300)
+frame.Position = UDim2.new(0,50,0,150)
+frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+frame.Active = true
+frame.Draggable = true
+
+local UIcorner = Instance.new("UICorner", frame)
+UIcorner.CornerRadius = UDim.new(0,15)
+
+-- عنوان
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1,0,0,30)
+title.Text = "DANCES"
+title.TextColor3 = Color3.fromRGB(0,255,255)
+title.BackgroundTransparency = 1
+title.Font = Enum.Font.GothamBold
+title.TextScaled = true
+
+-- أزرار الرقص
+local y = 40
+for name,id in pairs(Dances) do
+	local btn = Instance.new("TextButton", frame)
+	btn.Size = UDim2.new(0.9,0,0,30)
+	btn.Position = UDim2.new(0.05,0,0,y)
+	btn.Text = name
+	btn.BackgroundColor3 = Color3.fromRGB(40,40,40)
+	btn.TextColor3 = Color3.fromRGB(255,255,255)
+	btn.Font = Enum.Font.Gotham
+	btn.TextScaled = true
+	
+	local c = Instance.new("UICorner", btn)
+	c.CornerRadius = UDim.new(0,10)
+	
+	btn.MouseButton1Click:Connect(function()
+		PlayDance(id)
+	end)
+	
+	y = y + 35
+end
+
+-- زر إيقاف الرقصة
+local stop = Instance.new("TextButton", frame)
+stop.Size = UDim2.new(0.9,0,0,35)
+stop.Position = UDim2.new(0.05,0,1,-40)
+stop.Text = "STOP"
+stop.BackgroundColor3 = Color3.fromRGB(200,0,0)
+stop.TextColor3 = Color3.fromRGB(255,255,255)
+stop.Font = Enum.Font.GothamBold
+stop.TextScaled = true
+
+local stopCorner = Instance.new("UICorner", stop)
+stopCorner.CornerRadius = UDim.new(0,12)
+
+stop.MouseButton1Click:Connect(function()
+	StopDance()
+end)
+
+--// سحب القائمة بالكامل
+local dragging = false
+local dragInput, mousePos, framePos
+
+frame.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		mousePos = input.Position
+		framePos = frame.Position
+
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+frame.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement then
+		dragInput = input
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if input == dragInput and dragging then
+		local delta = input.Position - mousePos
+		frame.Position = UDim2.new(
+			framePos.X.Scale, framePos.X.Offset + delta.X,
+			framePos.Y.Scale, framePos.Y.Offset + delta.Y
+		)
+	end
+end)
+
+--////////////////////////////////////////////////////
 -- SYSTEMS
+--////////////////////////////////////////////////////
 RunService.RenderStepped:Connect(function()
+
 	local h = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
 	if h then
 		h.WalkSpeed = Settings.Speed
 		h.JumpPower = Settings.Jump
-		
-		if Settings.God then
-			h.Health = h.MaxHealth
+	end
+	
+	if Settings.God and h then
+		h.Health = h.MaxHealth
+	end
+	
+	if Settings.Aim then
+		local closest,dist=nil,150
+		for _,m in pairs(workspace:GetChildren()) do
+			if m:IsA("Model") and m:FindFirstChild("Head") then
+				local pos,vis=camera:WorldToViewportPoint(m.Head.Position)
+				if vis then
+					local mag=(Vector2.new(pos.X,pos.Y)-camera.ViewportSize/2).Magnitude
+					if mag<dist then dist=mag closest=m end
+				end
+			end
+		end
+		if closest then
+			camera.CFrame=camera.CFrame:Lerp(CFrame.new(camera.CFrame.Position,closest.Head.Position),0.2)
 		end
 	end
 end)
@@ -278,60 +479,168 @@ end)
 RunService.Stepped:Connect(function()
 	if Settings.NoClip and player.Character then
 		for _,v in pairs(player.Character:GetDescendants()) do
-			if v:IsA("BasePart") then
-				v.CanCollide = false
-			end
+			if v:IsA("BasePart") then v.CanCollide=false end
 		end
+	end
+end)
+
+-- LOGIN
+btn.MouseButton1Click:Connect(function()
+	if box.Text == GenerateKey() then
+		login.Visible = false
+		main.Visible = true
 	end
 end)
 -- يعمل فقط في Brookhaven
 if game.PlaceId ~= 4924922222 then
+	warn("Only Brookhaven!")
 	return
 end
 
+--// SERVICES
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
 
 local player = Players.LocalPlayer
 
--- إنشاء الاسم فوق الرأس
-local function ApplyName(char)
-	local head = char:WaitForChild("Head")
+--////////////////////////////////////////////////////
+-- SKINS (غيرها كما تريد)
+--////////////////////////////////////////////////////
+local Skins = {
+	["Rich Boy"] = 12345678,
+	["Gangster"] = 87654321,
+	["Police"] = 98765432,
+	["Anime"] = 11223344,
+	["Hacker"] = 55667788
+}
 
-	-- حذف أي اسم قديم
-	if head:FindFirstChild("CHIROX_NAME") then
-		head.CHIROX_NAME:Destroy()
-	end
-
-	-- GUI فوق الرأس
-	local bill = Instance.new("BillboardGui")
-	bill.Name = "CHIROX_NAME"
-	bill.Size = UDim2.new(0,200,0,50)
-	bill.StudsOffset = Vector3.new(0,2.5,0)
-	bill.AlwaysOnTop = true
-	bill.Parent = head
-
-	-- النص
-	local txt = Instance.new("TextLabel", bill)
-	txt.Size = UDim2.new(1,0,1,0)
-	txt.BackgroundTransparency = 1
-	txt.Text = "JINOXX"
-	txt.TextColor3 = Color3.fromRGB(255,0,0)
-	txt.TextScaled = true
-	txt.Font = Enum.Font.GothamBold
-
-	-- منع التغيير
-	RunService.RenderStepped:Connect(function()
-		if txt.Text ~= "CHIROX" then
-			txt.Text = "CHIROX"
-		end
-		txt.TextColor3 = Color3.fromRGB(255,0,0)
+--////////////////////////////////////////////////////
+-- APPLY SKIN
+--////////////////////////////////////////////////////
+local function ApplySkin(id)
+	local success, model = pcall(function()
+		return Players:GetHumanoidDescriptionFromUserId(id)
 	end)
+
+	if success and model then
+		local char = player.Character or player.CharacterAdded:Wait()
+		local hum = char:WaitForChild("Humanoid")
+		hum:ApplyDescription(model)
+	end
 end
 
--- عند السبون
-if player.Character then
-	ApplyName(player.Character)
+--////////////////////////////////////////////////////
+-- GUI
+--////////////////////////////////////////////////////
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0,220,0,300)
+frame.Position = UDim2.new(0,50,0,150)
+frame.BackgroundColor3 = Color3.fromRGB(15,15,15)
+frame.Active = true
+frame.Draggable = true
+Instance.new("UICorner", frame)
+
+-- TITLE
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1,0,0,35)
+title.Text = "SKINS"
+title.TextColor3 = Color3.fromRGB(255,0,0)
+title.BackgroundTransparency = 1
+title.Font = Enum.Font.GothamBold
+title.TextScaled = true
+
+-- BUTTONS
+local y = 40
+for name,id in pairs(Skins) do
+	local btn = Instance.new("TextButton", frame)
+	btn.Size = UDim2.new(0.9,0,0,30)
+	btn.Position = UDim2.new(0.05,0,0,y)
+	btn.Text = name
+	btn.BackgroundColor3 = Color3.fromRGB(30,30,30)
+	btn.TextColor3 = Color3.fromRGB(255,255,255)
+	btn.Font = Enum.Font.Gotham
+	btn.TextScaled = true
+	Instance.new("UICorner", btn)
+
+	btn.MouseButton1Click:Connect(function()
+		ApplySkin(id)
+	end)
+
+	y = y + 35
 end
 
-player.CharacterAdded:Connect(ApplyName)
+-- RESET
+local reset = Instance.new("TextButton", frame)
+reset.Size = UDim2.new(0.9,0,0,30)
+reset.Position = UDim2.new(0.05,0,1,-70)
+reset.Text = "RESET"
+reset.BackgroundColor3 = Color3.fromRGB(100,0,0)
+reset.TextColor3 = Color3.fromRGB(255,255,255)
+Instance.new("UICorner", reset)
+
+reset.MouseButton1Click:Connect(function()
+	player:LoadCharacter()
+end)
+
+-- HIDE
+local hide = Instance.new("TextButton", frame)
+hide.Size = UDim2.new(0,30,0,30)
+hide.Position = UDim2.new(1,-35,0,5)
+hide.Text = "-"
+Instance.new("UICorner", hide)
+
+-- FLOAT (OPEN)
+local open = Instance.new("TextButton", gui)
+open.Size = UDim2.new(0,100,0,40)
+open.Position = UDim2.new(0,20,0,200)
+open.Text = "SKINS"
+open.Visible = false
+Instance.new("UICorner", open)
+
+hide.MouseButton1Click:Connect(function()
+	frame.Visible = false
+	open.Visible = true
+end)
+
+open.MouseButton1Click:Connect(function()
+	frame.Visible = true
+	open.Visible = false
+end)
+
+-- DRAG OPEN BUTTON
+local dragging=false
+local dragInput,startPos,startFramePos
+
+open.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging=true
+		startPos=input.Position
+		startFramePos=open.Position
+		
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging=false
+			end
+		end)
+	end
+end)
+
+open.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement then
+		dragInput=input
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if input==dragInput and dragging then
+		local delta=input.Position-startPos
+		open.Position=UDim2.new(
+			startFramePos.X.Scale,
+			startFramePos.X.Offset+delta.X,
+			startFramePos.Y.Scale,
+			startFramePos.Y.Offset+delta.Y
+		)
+	end
+end)
