@@ -1,0 +1,276 @@
+--// SERVICES
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+
+--////////////////////////////////////////////////////
+-- KEY SYSTEM
+--////////////////////////////////////////////////////
+local function GenerateKey()
+	local prefix = "JINOXX-HTMK-RTG-"
+	local cycle = math.floor(os.time() / (48*60*60))
+	local num = (cycle * 7357) % 100
+	return prefix .. string.format("%02d", num)
+end
+
+--////////////////////////////////////////////////////
+-- GUI
+--////////////////////////////////////////////////////
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+
+-- LOGIN
+local login = Instance.new("Frame", gui)
+login.Size = UDim2.new(0,360,0,230)
+login.Position = UDim2.new(0.5,-180,0.5,-115)
+login.BackgroundColor3 = Color3.fromRGB(10,10,20)
+login.Active = true
+login.Draggable = true
+Instance.new("UICorner",login).CornerRadius = UDim.new(0,25)
+
+local title = Instance.new("TextLabel",login)
+title.Size = UDim2.new(1,0,0,50)
+title.Text = "⚡ JINOXX LOGIN ⚡"
+title.TextColor3 = Color3.fromRGB(0,200,255)
+title.BackgroundTransparency = 1
+title.TextScaled = true
+
+local box = Instance.new("TextBox",login)
+box.Size = UDim2.new(0.8,0,0,40)
+box.Position = UDim2.new(0.1,0,0.4,0)
+box.PlaceholderText = "ENTER KEY"
+Instance.new("UICorner",box)
+
+if player.Name == "jinoxx_back" then
+	box.Text = GenerateKey()
+end
+
+local btn = Instance.new("TextButton",login)
+btn.Size = UDim2.new(0.5,0,0,40)
+btn.Position = UDim2.new(0.25,0,0.7,0)
+btn.Text = "LOGIN"
+btn.BackgroundColor3 = Color3.fromRGB(0,200,255)
+Instance.new("UICorner",btn)
+
+-- MAIN
+local main = Instance.new("Frame",gui)
+main.Size = UDim2.new(0,600,0,360)
+main.Position = UDim2.new(0.3,0,0.3,0)
+main.BackgroundColor3 = Color3.fromRGB(5,5,10)
+main.Visible = false
+main.Active = true
+main.Draggable = true
+Instance.new("UICorner",main)
+
+-- FLOAT BUTTON
+local float = Instance.new("TextButton",gui)
+float.Size = UDim2.new(0,100,0,40)
+float.Position = UDim2.new(0,20,0,200)
+float.Text = "OPEN"
+float.Visible = false
+Instance.new("UICorner",float)
+
+-- TITLE
+local t = Instance.new("TextLabel",main)
+t.Size = UDim2.new(1,0,0,40)
+t.Text = "⚡ JINOXX XIT PRO MAX ⚡"
+t.TextColor3 = Color3.fromRGB(0,200,255)
+t.BackgroundTransparency = 1
+t.TextScaled = true
+
+-- HIDE
+local hide = Instance.new("TextButton",main)
+hide.Size = UDim2.new(0,30,0,30)
+hide.Position = UDim2.new(1,-35,0,5)
+hide.Text = "-"
+Instance.new("UICorner",hide)
+
+hide.MouseButton1Click:Connect(function()
+	main.Visible = false
+	float.Visible = true
+end)
+
+float.MouseButton1Click:Connect(function()
+	main.Visible = true
+	float.Visible = false
+end)
+
+--////////////////////////////////////////////////////
+-- SETTINGS
+--////////////////////////////////////////////////////
+local Settings = {
+	God=false,
+	NoClip=false,
+	InfiniteJump=false,
+	Aim=false,
+	ESP=false,
+	Speed=16,
+	Jump=50
+}
+
+--////////////////////////////////////////////////////
+-- TOGGLE
+--////////////////////////////////////////////////////
+local function Toggle(text,y,callback)
+	local state=false
+	
+	local lbl = Instance.new("TextLabel",main)
+	lbl.Position = UDim2.new(0,20,0,y)
+	lbl.Size = UDim2.new(0,200,0,30)
+	lbl.Text = text
+	lbl.TextColor3 = Color3.fromRGB(0,200,255)
+	lbl.BackgroundTransparency = 1
+	
+	local btn = Instance.new("TextButton",main)
+	btn.Size = UDim2.new(0,70,0,30)
+	btn.Position = UDim2.new(1,-90,0,y)
+	btn.Text = "OFF"
+	btn.BackgroundColor3 = Color3.fromRGB(80,0,0)
+	Instance.new("UICorner",btn)
+	
+	btn.MouseButton1Click:Connect(function()
+		state = not state
+		btn.Text = state and "ON" or "OFF"
+		btn.BackgroundColor3 = state and Color3.fromRGB(0,200,0) or Color3.fromRGB(80,0,0)
+		callback(state)
+	end)
+end
+
+-- FEATURES
+Toggle("ANTI KILL",60,function(v) Settings.God=v end)
+Toggle("NO CLIP",100,function(v) Settings.NoClip=v end)
+Toggle("INFINITE JUMP",140,function(v) Settings.InfiniteJump=v end)
+Toggle("AIM ASSIST",180,function(v) Settings.Aim=v end)
+Toggle("ESP",220,function(v) Settings.ESP=v end)
+
+-- SPEED
+local speed = Instance.new("TextButton",main)
+speed.Position = UDim2.new(0,20,0,260)
+speed.Size = UDim2.new(0,120,0,35)
+speed.Text = "Speed +10"
+Instance.new("UICorner",speed)
+
+speed.MouseButton1Click:Connect(function()
+	Settings.Speed += 10
+end)
+
+-- JUMP
+local jump = Instance.new("TextButton",main)
+jump.Position = UDim2.new(0,160,0,260)
+jump.Size = UDim2.new(0,120,0,35)
+jump.Text = "Jump +10"
+Instance.new("UICorner",jump)
+
+jump.MouseButton1Click:Connect(function()
+	Settings.Jump += 10
+end)
+
+-- TELEPORT
+local boxTP = Instance.new("TextBox",main)
+boxTP.Size = UDim2.new(0.5,0,0,35)
+boxTP.Position = UDim2.new(0.25,0,0,310)
+boxTP.PlaceholderText = "Username"
+Instance.new("UICorner",boxTP)
+
+local tp = Instance.new("TextButton",main)
+tp.Size = UDim2.new(0.4,0,0,35)
+tp.Position = UDim2.new(0.3,0,0,345)
+tp.Text = "TELEPORT"
+Instance.new("UICorner",tp)
+
+tp.MouseButton1Click:Connect(function()
+	for _,plr in pairs(Players:GetPlayers()) do
+		if string.find(string.lower(plr.Name), string.lower(boxTP.Text)) then
+			if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+				player.Character:MoveTo(plr.Character.HumanoidRootPart.Position + Vector3.new(0,3,0))
+			end
+		end
+	end
+end)
+
+--////////////////////////////////////////////////////
+-- ESP SYSTEM
+--////////////////////////////////////////////////////
+local function CreateESP(m)
+	if not m:FindFirstChild("Head") then return end
+	
+	local bill = Instance.new("BillboardGui", m.Head)
+	bill.Size = UDim2.new(0,120,0,50)
+	bill.AlwaysOnTop = true
+	
+	local txt = Instance.new("TextLabel",bill)
+	txt.Size = UDim2.new(1,0,1,0)
+	txt.BackgroundTransparency = 1
+	txt.TextColor3 = Color3.fromRGB(0,255,255)
+	txt.TextScaled = true
+	
+	RunService.RenderStepped:Connect(function()
+		if Settings.ESP and m:FindFirstChild("HumanoidRootPart") then
+			local dist = (player.Character.HumanoidRootPart.Position - m.HumanoidRootPart.Position).Magnitude
+			txt.Text = m.Name.." ["..math.floor(dist).."]"
+			bill.Enabled = true
+		else
+			bill.Enabled = false
+		end
+	end)
+end
+
+for _,v in pairs(workspace:GetChildren()) do
+	if v:IsA("Model") then CreateESP(v) end
+end
+
+--////////////////////////////////////////////////////
+-- SYSTEMS
+--////////////////////////////////////////////////////
+RunService.RenderStepped:Connect(function()
+
+	local h = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+	if h then
+		h.WalkSpeed = Settings.Speed
+		h.JumpPower = Settings.Jump
+	end
+	
+	if Settings.God and h then
+		h.Health = h.MaxHealth
+	end
+	
+	if Settings.Aim then
+		local closest,dist=nil,150
+		for _,m in pairs(workspace:GetChildren()) do
+			if m:IsA("Model") and m:FindFirstChild("Head") then
+				local pos,vis=camera:WorldToViewportPoint(m.Head.Position)
+				if vis then
+					local mag=(Vector2.new(pos.X,pos.Y)-camera.ViewportSize/2).Magnitude
+					if mag<dist then dist=mag closest=m end
+				end
+			end
+		end
+		if closest then
+			camera.CFrame=camera.CFrame:Lerp(CFrame.new(camera.CFrame.Position,closest.Head.Position),0.2)
+		end
+	end
+end)
+
+UIS.JumpRequest:Connect(function()
+	if Settings.InfiniteJump then
+		player.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+	end
+end)
+
+RunService.Stepped:Connect(function()
+	if Settings.NoClip and player.Character then
+		for _,v in pairs(player.Character:GetDescendants()) do
+			if v:IsA("BasePart") then v.CanCollide=false end
+		end
+	end
+end)
+
+-- LOGIN
+btn.MouseButton1Click:Connect(function()
+	if box.Text == GenerateKey() then
+		login.Visible = false
+		main.Visible = true
+	end
+end)
