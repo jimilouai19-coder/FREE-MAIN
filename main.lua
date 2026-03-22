@@ -190,7 +190,6 @@ Instance.new("UICorner",jumpBtn)
 jumpBtn.MouseButton1Click:Connect(function()
 	Settings.Jump += 10
 end)
-
 -- TELEPORT
 local boxTP = Instance.new("TextBox", main)
 boxTP.Size = UDim2.new(0.5,0,0,35)
@@ -213,6 +212,7 @@ tpBtn.MouseButton1Click:Connect(function()
 		end
 	end
 end)
+
 
 --========================================
 -- ADVANCED BRING BRAINROT 🧠🔥
