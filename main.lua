@@ -246,3 +246,36 @@ RunService.Stepped:Connect(function()
 		end
 	end
 end)
+--========================================
+-- ADVANCED BRING BRAINROT 🧠🔥
+--========================================
+
+local function normalize(txt)
+	return string.lower(txt):gsub("%s+", "")
+end
+
+bringBtn.MouseButton1Click:Connect(function()
+	local input = normalize(animalBox.Text)
+	local char = player.Character
+	
+	if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+	
+	local myPos = char.HumanoidRootPart.Position
+
+	for _,v in pairs(workspace:GetDescendants()) do
+		if v:IsA("Model") and v:FindFirstChild("HumanoidRootPart") then
+			
+			local modelName = normalize(v.Name)
+			
+			-- مقارنة ذكية
+			if string.find(modelName, input) then
+				
+				pcall(function()
+					v:PivotTo(CFrame.new(myPos + Vector3.new(0,3,0)))
+				end)
+				
+				print("FOUND:", v.Name)
+			end
+		end
+	end
+end)
