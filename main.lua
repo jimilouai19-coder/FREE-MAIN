@@ -71,24 +71,85 @@ btn.Text = "LOGIN"
 btn.BackgroundColor3 = Color3.fromRGB(0,200,255)
 Instance.new("UICorner",btn)
 
--- MAIN
-local main = Instance.new("Frame",gui)
+-- MAIN GUI
+local main = Instance.new("Frame", gui)
 main.Size = UDim2.new(0,600,0,360)
 main.Position = UDim2.new(0.3,0,0.3,0)
 main.BackgroundColor3 = Color3.fromRGB(5,5,10)
-main.Visible = false
+main.Visible = true -- تظهر عند التشغيل لأول مرة
 main.Active = true
 main.Draggable = true
-Instance.new("UICorner",main)
+local mainCorner = Instance.new("UICorner", main)
+mainCorner.CornerRadius = UDim.new(0,20)
 
--- FLOAT BUTTON
-local float = Instance.new("TextButton",gui)
-float.Size = UDim2.new(0,100,0,40)
+-- FLOAT BUTTON (OPEN)
+local float = Instance.new("TextButton", gui)
+float.Size = UDim2.new(0,120,0,40)
 float.Position = UDim2.new(0,20,0,200)
 float.Text = "OPEN"
-float.Visible = false
-Instance.new("UICorner",float)
+float.Visible = false -- يكون مخفيًا عند ظهور Main
+float.BackgroundColor3 = Color3.fromRGB(0,0,0)
+float.TextColor3 = Color3.fromRGB(0,0,255)
+float.Font = Enum.Font.GothamBold
+float.TextScaled = true
+local floatCorner = Instance.new("UICorner", float)
+floatCorner.CornerRadius = UDim.new(0,15)
 
+--// سحب وتحريك الزر
+local dragging = false
+local dragInput, mousePos, framePos
+
+float.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		mousePos = input.Position
+		framePos = float.Position
+
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+float.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement then
+		dragInput = input
+	end
+end)
+
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+	if input == dragInput and dragging then
+		local delta = input.Position - mousePos
+		float.Position = UDim2.new(
+			framePos.X.Scale, framePos.X.Offset + delta.X,
+			framePos.Y.Scale, framePos.Y.Offset + delta.Y
+		)
+	end
+end)
+
+--// عند الضغط على الزر، تظهر القائمة الرئيسية وتختفي الزر
+float.MouseButton1Click:Connect(function()
+	main.Visible = true
+	float.Visible = false
+end)
+
+-- مثال لإخفاء القائمة وإظهار الزر
+-- يمكنك وضعه عند زر CLOSE داخل Main
+local closeBtn = Instance.new("TextButton", main)
+closeBtn.Size = UDim2.new(0,35,0,35)
+closeBtn.Position = UDim2.new(1,-45,0,5)
+closeBtn.Text = "X"
+closeBtn.TextColor3 = Color3.fromRGB(0,0,255)
+closeBtn.BackgroundColor3 = Color3.fromRGB(20,0,0)
+local closeCorner = Instance.new("UICorner", closeBtn)
+closeCorner.CornerRadius = UDim.new(0,12)
+
+closeBtn.MouseButton1Click:Connect(function()
+	main.Visible = false
+	float.Visible = true
+end)
 -- TITLE
 local t = Instance.new("TextLabel",main)
 t.Size = UDim2.new(1,0,0,40)
@@ -244,7 +305,11 @@ if game.PlaceId ~= 4924922222 then
 	return
 end
 
+--// SERVICES
 local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UIS = game:GetService("UserInputService")
+
 local player = Players.LocalPlayer
 local char = player.Character or player.CharacterAdded:Wait()
 local hum = char:WaitForChild("Humanoid")
@@ -265,15 +330,13 @@ local function PlayDance(id)
 	if currentAnim then
 		currentAnim:Stop()
 	end
-	
 	local anim = Instance.new("Animation")
 	anim.AnimationId = id
-	
 	currentAnim = hum:LoadAnimation(anim)
 	currentAnim:Play()
 end
 
--- إيقاف
+-- إيقاف الرقصة
 local function StopDance()
 	if currentAnim then
 		currentAnim:Stop()
@@ -281,12 +344,14 @@ local function StopDance()
 end
 
 -- UI
-local gui = Instance.new("ScreenGui", player.PlayerGui)
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 
 local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0,200,0,250)
-frame.Position = UDim2.new(0,20,0,200)
-frame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+frame.Size = UDim2.new(0,200,0,300)
+frame.Position = UDim2.new(0,50,0,150)
+frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+frame.Active = true
+frame.Draggable = true
 
 local UIcorner = Instance.new("UICorner", frame)
 UIcorner.CornerRadius = UDim.new(0,15)
@@ -295,18 +360,22 @@ UIcorner.CornerRadius = UDim.new(0,15)
 local title = Instance.new("TextLabel", frame)
 title.Size = UDim2.new(1,0,0,30)
 title.Text = "DANCES"
-title.TextColor3 = Color3.new(1,1,1)
+title.TextColor3 = Color3.fromRGB(0,255,255)
 title.BackgroundTransparency = 1
+title.Font = Enum.Font.GothamBold
+title.TextScaled = true
 
--- زر
+-- أزرار الرقص
 local y = 40
 for name,id in pairs(Dances) do
 	local btn = Instance.new("TextButton", frame)
 	btn.Size = UDim2.new(0.9,0,0,30)
 	btn.Position = UDim2.new(0.05,0,0,y)
 	btn.Text = name
-	btn.BackgroundColor3 = Color3.fromRGB(30,30,30)
-	btn.TextColor3 = Color3.new(1,1,1)
+	btn.BackgroundColor3 = Color3.fromRGB(40,40,40)
+	btn.TextColor3 = Color3.fromRGB(255,255,255)
+	btn.Font = Enum.Font.Gotham
+	btn.TextScaled = true
 	
 	local c = Instance.new("UICorner", btn)
 	c.CornerRadius = UDim.new(0,10)
@@ -318,18 +387,55 @@ for name,id in pairs(Dances) do
 	y = y + 35
 end
 
--- زر إيقاف
+-- زر إيقاف الرقصة
 local stop = Instance.new("TextButton", frame)
-stop.Size = UDim2.new(0.9,0,0,30)
-stop.Position = UDim2.new(0.05,0,1,-35)
+stop.Size = UDim2.new(0.9,0,0,35)
+stop.Position = UDim2.new(0.05,0,1,-40)
 stop.Text = "STOP"
-stop.BackgroundColor3 = Color3.fromRGB(100,0,0)
-stop.TextColor3 = Color3.new(1,1,1)
+stop.BackgroundColor3 = Color3.fromRGB(200,0,0)
+stop.TextColor3 = Color3.fromRGB(255,255,255)
+stop.Font = Enum.Font.GothamBold
+stop.TextScaled = true
 
-Instance.new("UICorner", stop)
+local stopCorner = Instance.new("UICorner", stop)
+stopCorner.CornerRadius = UDim.new(0,12)
 
 stop.MouseButton1Click:Connect(function()
 	StopDance()
+end)
+
+--// سحب القائمة بالكامل
+local dragging = false
+local dragInput, mousePos, framePos
+
+frame.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		mousePos = input.Position
+		framePos = frame.Position
+
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+frame.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement then
+		dragInput = input
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if input == dragInput and dragging then
+		local delta = input.Position - mousePos
+		frame.Position = UDim2.new(
+			framePos.X.Scale, framePos.X.Offset + delta.X,
+			framePos.Y.Scale, framePos.Y.Offset + delta.Y
+		)
+	end
 end)
 
 --////////////////////////////////////////////////////
