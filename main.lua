@@ -491,76 +491,66 @@ btn.MouseButton1Click:Connect(function()
 		main.Visible = true
 	end
 end)
+
 -- يعمل فقط في Brookhaven
 if game.PlaceId ~= 4924922222 then
-	warn("Only Brookhaven!")
+	warn("Brookhaven only!")
 	return
 end
 
---// SERVICES
 local Players = game:GetService("Players")
-local UIS = game:GetService("UserInputService")
-
 local player = Players.LocalPlayer
 
---////////////////////////////////////////////////////
--- SKINS (غيرها كما تريد)
---////////////////////////////////////////////////////
-local Skins = {
-	["Rich Boy"] = 12345678,
-	["Gangster"] = 87654321,
-	["Police"] = 98765432,
-	["Anime"] = 11223344,
-	["Hacker"] = 55667788
-}
-
---////////////////////////////////////////////////////
--- APPLY SKIN
---////////////////////////////////////////////////////
-local function ApplySkin(id)
-	local success, model = pcall(function()
-		return Players:GetHumanoidDescriptionFromUserId(id)
-	end)
-
-	if success and model then
-		local char = player.Character or player.CharacterAdded:Wait()
-		local hum = char:WaitForChild("Humanoid")
-		hum:ApplyDescription(model)
-	end
-end
-
---////////////////////////////////////////////////////
 -- GUI
---////////////////////////////////////////////////////
 local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 
 local frame = Instance.new("Frame", gui)
 frame.Size = UDim2.new(0,220,0,300)
-frame.Position = UDim2.new(0,50,0,150)
+frame.Position = UDim2.new(0,20,0,150)
 frame.BackgroundColor3 = Color3.fromRGB(15,15,15)
 frame.Active = true
 frame.Draggable = true
 Instance.new("UICorner", frame)
 
--- TITLE
 local title = Instance.new("TextLabel", frame)
 title.Size = UDim2.new(1,0,0,35)
 title.Text = "SKINS"
 title.TextColor3 = Color3.fromRGB(255,0,0)
 title.BackgroundTransparency = 1
-title.Font = Enum.Font.GothamBold
 title.TextScaled = true
 
--- BUTTONS
+-- 📌 سكينات (UserIds)
+local Skins = {
+	["Noob"] = 1,
+	["Cool Boy"] = 261,
+	["Girl Style"] = 485,
+	["Rich Style"] = 156,
+	["Tryhard"] = 577,
+}
+
+-- تطبيق السكن
+local function ApplySkin(userId)
+	local success, desc = pcall(function()
+		return Players:GetHumanoidDescriptionFromUserId(userId)
+	end)
+
+	if success and desc then
+		local char = player.Character
+		if char and char:FindFirstChildOfClass("Humanoid") then
+			char:FindFirstChildOfClass("Humanoid"):ApplyDescription(desc)
+		end
+	end
+end
+
+-- أزرار
 local y = 40
-for name,id in pairs(Skins) do
+for name, id in pairs(Skins) do
 	local btn = Instance.new("TextButton", frame)
-	btn.Size = UDim2.new(0.9,0,0,30)
+	btn.Size = UDim2.new(0.9,0,0,35)
 	btn.Position = UDim2.new(0.05,0,0,y)
 	btn.Text = name
 	btn.BackgroundColor3 = Color3.fromRGB(30,30,30)
 	btn.TextColor3 = Color3.fromRGB(255,255,255)
-	btn.Font = Enum.Font.Gotham
 	btn.TextScaled = true
 	Instance.new("UICorner", btn)
 
@@ -568,79 +558,5 @@ for name,id in pairs(Skins) do
 		ApplySkin(id)
 	end)
 
-	y = y + 35
+	y = y + 40
 end
-
--- RESET
-local reset = Instance.new("TextButton", frame)
-reset.Size = UDim2.new(0.9,0,0,30)
-reset.Position = UDim2.new(0.05,0,1,-70)
-reset.Text = "RESET"
-reset.BackgroundColor3 = Color3.fromRGB(100,0,0)
-reset.TextColor3 = Color3.fromRGB(255,255,255)
-Instance.new("UICorner", reset)
-
-reset.MouseButton1Click:Connect(function()
-	player:LoadCharacter()
-end)
-
--- HIDE
-local hide = Instance.new("TextButton", frame)
-hide.Size = UDim2.new(0,30,0,30)
-hide.Position = UDim2.new(1,-35,0,5)
-hide.Text = "-"
-Instance.new("UICorner", hide)
-
--- FLOAT (OPEN)
-local open = Instance.new("TextButton", gui)
-open.Size = UDim2.new(0,100,0,40)
-open.Position = UDim2.new(0,20,0,200)
-open.Text = "SKINS"
-open.Visible = false
-Instance.new("UICorner", open)
-
-hide.MouseButton1Click:Connect(function()
-	frame.Visible = false
-	open.Visible = true
-end)
-
-open.MouseButton1Click:Connect(function()
-	frame.Visible = true
-	open.Visible = false
-end)
-
--- DRAG OPEN BUTTON
-local dragging=false
-local dragInput,startPos,startFramePos
-
-open.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragging=true
-		startPos=input.Position
-		startFramePos=open.Position
-		
-		input.Changed:Connect(function()
-			if input.UserInputState == Enum.UserInputState.End then
-				dragging=false
-			end
-		end)
-	end
-end)
-
-open.InputChanged:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseMovement then
-		dragInput=input
-	end
-end)
-
-UIS.InputChanged:Connect(function(input)
-	if input==dragInput and dragging then
-		local delta=input.Position-startPos
-		open.Position=UDim2.new(
-			startFramePos.X.Scale,
-			startFramePos.X.Offset+delta.X,
-			startFramePos.Y.Scale,
-			startFramePos.Y.Offset+delta.Y
-		)
-	end
-end)
