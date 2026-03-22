@@ -284,3 +284,54 @@ RunService.Stepped:Connect(function()
 		end
 	end
 end)
+-- يعمل فقط في Brookhaven
+if game.PlaceId ~= 4924922222 then
+	return
+end
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+
+-- إنشاء الاسم فوق الرأس
+local function ApplyName(char)
+	local head = char:WaitForChild("Head")
+
+	-- حذف أي اسم قديم
+	if head:FindFirstChild("CHIROX_NAME") then
+		head.CHIROX_NAME:Destroy()
+	end
+
+	-- GUI فوق الرأس
+	local bill = Instance.new("BillboardGui")
+	bill.Name = "CHIROX_NAME"
+	bill.Size = UDim2.new(0,200,0,50)
+	bill.StudsOffset = Vector3.new(0,2.5,0)
+	bill.AlwaysOnTop = true
+	bill.Parent = head
+
+	-- النص
+	local txt = Instance.new("TextLabel", bill)
+	txt.Size = UDim2.new(1,0,1,0)
+	txt.BackgroundTransparency = 1
+	txt.Text = "JINOXX"
+	txt.TextColor3 = Color3.fromRGB(255,0,0)
+	txt.TextScaled = true
+	txt.Font = Enum.Font.GothamBold
+
+	-- منع التغيير
+	RunService.RenderStepped:Connect(function()
+		if txt.Text ~= "CHIROX" then
+			txt.Text = "CHIROX"
+		end
+		txt.TextColor3 = Color3.fromRGB(255,0,0)
+	end)
+end
+
+-- عند السبون
+if player.Character then
+	ApplyName(player.Character)
+end
+
+player.CharacterAdded:Connect(ApplyName)
