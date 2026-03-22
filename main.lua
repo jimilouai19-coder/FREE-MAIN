@@ -215,38 +215,6 @@ tpBtn.MouseButton1Click:Connect(function()
 end)
 
 --========================================
--- SYSTEMS
---========================================
-RunService.RenderStepped:Connect(function()
-	local char = GetChar()
-	local h = char:FindFirstChildOfClass("Humanoid")
-	if not h then return end
-
-	h.WalkSpeed = Settings.Speed
-	h.JumpPower = Settings.Jump
-
-	if Settings.God then
-		h.Health = h.MaxHealth
-	end
-end)
-
-UIS.JumpRequest:Connect(function()
-	if Settings.InfiniteJump then
-		local h = GetChar():FindFirstChildOfClass("Humanoid")
-		if h then h:ChangeState("Jumping") end
-	end
-end)
-
-RunService.Stepped:Connect(function()
-	if Settings.NoClip then
-		for _,v in pairs(GetChar():GetDescendants()) do
-			if v:IsA("BasePart") then
-				v.CanCollide = false
-			end
-		end
-	end
-end)
---========================================
 -- ADVANCED BRING BRAINROT 🧠🔥
 --========================================
 
@@ -275,6 +243,39 @@ bringBtn.MouseButton1Click:Connect(function()
 				end)
 				
 				print("FOUND:", v.Name)
+			end
+		end
+	end
+end)
+
+--========================================
+-- SYSTEMS
+--========================================
+RunService.RenderStepped:Connect(function()
+	local char = GetChar()
+	local h = char:FindFirstChildOfClass("Humanoid")
+	if not h then return end
+
+	h.WalkSpeed = Settings.Speed
+	h.JumpPower = Settings.Jump
+
+	if Settings.God then
+		h.Health = h.MaxHealth
+	end
+end)
+
+UIS.JumpRequest:Connect(function()
+	if Settings.InfiniteJump then
+		local h = GetChar():FindFirstChildOfClass("Humanoid")
+		if h then h:ChangeState("Jumping") end
+	end
+end)
+
+RunService.Stepped:Connect(function()
+	if Settings.NoClip then
+		for _,v in pairs(GetChar():GetDescendants()) do
+			if v:IsA("BasePart") then
+				v.CanCollide = false
 			end
 		end
 	end
